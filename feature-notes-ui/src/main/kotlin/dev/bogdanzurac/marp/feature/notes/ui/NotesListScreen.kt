@@ -33,7 +33,7 @@ internal fun NotesListScreen(viewModel: NotesListViewModel = koinViewModel()) =
     BaseScreen(viewModel) { state ->
         when (val uiState = state.value) {
             is Loading -> LoadingView()
-            is Error, Empty -> EmptyView()
+            is Error -> EmptyView()
             is Success -> NotesListView(uiState, viewModel)
             is NotLoggedIn -> NotLoggedInView(viewModel)
         }
@@ -48,46 +48,52 @@ private fun NotesListView(
 ) {
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = events::onAddNoteClicked,
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(CoreUiR.string.button_add),
-                )
-            }
+            if (state.showAddNoteButton)
+                FloatingActionButton(
+                    onClick = events::onAddNoteClicked,
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = stringResource(CoreUiR.string.button_add),
+                    )
+                }
         },
         content = {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                if (state.personalNotes.isNotEmpty()) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Text(
-                            text = stringResource(R.string.header_personal_notes),
-                            style = MaterialTheme.typography.headlineSmall,
-                            modifier = Modifier.padding(16.dp),
-                        )
+            if (state.cryptoNotes.isEmpty() &&
+                state.personalNotes.isEmpty()
+            )
+                EmptyView()
+            else
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    if (state.personalNotes.isNotEmpty()) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Text(
+                                text = stringResource(R.string.header_personal_notes),
+                                style = MaterialTheme.typography.headlineSmall,
+                                modifier = Modifier.padding(16.dp),
+                            )
+                        }
+                        items(state.personalNotes, { it.id }) { note ->
+                            NoteView(note, addPadding = true) { events.onNoteClicked(note.id) }
+                        }
                     }
-                    items(state.personalNotes, { it.id }) { note ->
-                        NoteView(note, addPadding = true) { events.onNoteClicked(note.id) }
+                    if (state.cryptoNotes.isNotEmpty()) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Text(
+                                text = stringResource(NotesUiCommonR.string.header_crypto_notes),
+                                style = MaterialTheme.typography.headlineSmall,
+                                modifier = Modifier.padding(16.dp),
+                            )
+                        }
+                        items(state.cryptoNotes, { it.id }) { note ->
+                            NoteView(note, addPadding = true) { events.onNoteClicked(note.id) }
+                        }
                     }
                 }
-                if (state.cryptoNotes.isNotEmpty()) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Text(
-                            text = stringResource(NotesUiCommonR.string.header_crypto_notes),
-                            style = MaterialTheme.typography.headlineSmall,
-                            modifier = Modifier.padding(16.dp),
-                        )
-                    }
-                    items(state.cryptoNotes, { it.id }) { note ->
-                        NoteView(note, addPadding = true) { events.onNoteClicked(note.id) }
-                    }
-                }
-            }
         })
 }
 
@@ -132,7 +138,9 @@ private fun NotesListPreview() {
         NotesListView(
             Success(
                 personalNotes = MutableList(10) { composeNotePreview },
-                cryptoNotes = MutableList(10) { composeNotePreview }),
+                cryptoNotes = MutableList(10) { composeNotePreview },
+                showAddNoteButton = true
+            ),
             events = object : NotesListUiEvents {
                 override fun onAddNoteClicked() {}
                 override fun onNoteClicked(id: String) {}

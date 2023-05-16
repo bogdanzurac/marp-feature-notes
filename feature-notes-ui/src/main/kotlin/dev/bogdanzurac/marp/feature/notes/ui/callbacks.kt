@@ -5,4 +5,6 @@ import dev.bogdanzurac.marp.core.navigation.AppRoute
 interface NotesCallbacks {
 
     fun getLoginRoute(): AppRoute
+
+    fun shouldShowAllNotes(): Boolean
 }

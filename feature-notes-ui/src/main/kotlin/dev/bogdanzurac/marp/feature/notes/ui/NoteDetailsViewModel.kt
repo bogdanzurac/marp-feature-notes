@@ -1,8 +1,6 @@
 package dev.bogdanzurac.marp.feature.notes.ui
 
 import androidx.lifecycle.viewModelScope
-import dev.bogdanzurac.marp.feature.notes.ui.NoteDetailsViewModel.NoteDetailsUiState
-import dev.bogdanzurac.marp.feature.notes.ui.NoteDetailsViewModel.NoteDetailsUiState.*
 import dev.bogdanzurac.marp.core.*
 import dev.bogdanzurac.marp.core.auth.AuthManager
 import dev.bogdanzurac.marp.core.prompts.DialogManager
@@ -11,6 +9,8 @@ import dev.bogdanzurac.marp.core.ui.Tracker
 import dev.bogdanzurac.marp.core.ui.UiState
 import dev.bogdanzurac.marp.core.ui.getGenericErrorDialogFor
 import dev.bogdanzurac.marp.feature.notes.domain.*
+import dev.bogdanzurac.marp.feature.notes.ui.NoteDetailsViewModel.NoteDetailsUiState
+import dev.bogdanzurac.marp.feature.notes.ui.NoteDetailsViewModel.NoteDetailsUiState.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -27,6 +27,7 @@ internal class NoteDetailsViewModel(
     private val deleteNoteUseCase: DeleteNoteUseCase,
     private val observeNoteUseCase: ObserveNoteUseCase,
     private val editNoteUseCase: EditNoteUseCase,
+    private val featureCallbacks: NotesCallbacks,
     private val dialogManager: DialogManager,
     private val tracker: Tracker,
     private val navigator: NotesNavigator,
@@ -97,14 +98,24 @@ internal class NoteDetailsViewModel(
                         Loading
                     }
                     isLoading -> Loading
-                    else -> Success(note!!)
+                    else -> {
+                        val isEditable =
+                            note!!.userId == authManager.getUser()!!.id ||
+                                    featureCallbacks.shouldShowAllNotes()
+                        Success(note, isEditable)
+                    }
                 }
             }, { Error(it) })
             .asState(Loading)
 
     internal sealed class NoteDetailsUiState : UiState {
         class Error(val exception: Throwable) : NoteDetailsUiState()
-        class Success(val note: Note) : NoteDetailsUiState()
+
+        class Success(
+            val note: Note,
+            val isEditable: Boolean
+        ) : NoteDetailsUiState()
+
         object Loading : NoteDetailsUiState()
     }
 

@@ -9,5 +9,5 @@ class NotesCallbacksImpl : NotesCallbacks {
 
     override fun getLoginRoute() = Auth
 
-    override fun shouldShowAllNotes(): Boolean = true
+    override fun shouldShowAllNotes(): Boolean = false
 }

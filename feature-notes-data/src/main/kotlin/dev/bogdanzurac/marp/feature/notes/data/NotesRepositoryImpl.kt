@@ -25,16 +25,14 @@ internal class NotesRepositoryImpl(
         firebaseDatabase.observeData<NoteModel>(NOTES_COLLECTION_NAME, filtering)
             .combineResult(userId().map { Result.success(it) })
             .mapResult { result ->
-                result.first.map { note ->
-                    note.toNote(isEditable = note.userId == result.second)
-                }
+                result.first.map { note -> note.toNote() }
             }
             .flowOn(Dispatchers.IO)
 
     override suspend fun createNote(note: Note): Result<Note> =
         withContext(Dispatchers.IO) {
             firebaseDatabase.addData(NOTES_COLLECTION_NAME, note.toNoteModel())
-                .map { it.toNote(isEditable = true) }
+                .map { it.toNote() }
         }
 
     override suspend fun editNote(note: Note): Result<Unit> =

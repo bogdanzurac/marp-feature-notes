@@ -12,6 +12,5 @@ data class Note(
     val updatedAt: Instant = now(),
     val cryptoId: String? = null,
     val userId: String,
-    val isEditable: Boolean = false,
     val cryptoAsset: CryptoAsset? = null,
 )

@@ -28,7 +28,7 @@ internal fun Note.toNoteModel(): NoteModel =
         Timestamp(Date(updatedAt.toEpochMilliseconds()))
     )
 
-internal fun NoteModel.toNote(isEditable: Boolean): Note =
+internal fun NoteModel.toNote(): Note =
     Note(
         id,
         title,
@@ -37,5 +37,4 @@ internal fun NoteModel.toNote(isEditable: Boolean): Note =
         Instant.fromEpochSeconds(createdAt.seconds),
         cryptoId,
         userId,
-        isEditable
     )

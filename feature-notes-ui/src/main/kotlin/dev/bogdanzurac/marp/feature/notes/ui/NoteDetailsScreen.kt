@@ -27,7 +27,6 @@ import dev.bogdanzurac.marp.core.ui.composable.LoadingView
 import dev.bogdanzurac.marp.core.ui.format
 import dev.bogdanzurac.marp.core.ui.toLocalDateTime
 import dev.bogdanzurac.marp.feature.crypto.ui.common.priceFormatted
-import dev.bogdanzurac.marp.feature.notes.domain.Note
 import dev.bogdanzurac.marp.feature.notes.ui.NoteDetailsViewModel.NoteDetailsArgs
 import dev.bogdanzurac.marp.feature.notes.ui.NoteDetailsViewModel.NoteDetailsUiState.*
 import dev.bogdanzurac.marp.feature.notes.ui.common.composeNotePreview
@@ -46,7 +45,7 @@ internal fun NoteDetailsScreen(
     when (val uiState = state.value) {
         is Loading -> LoadingView()
         is Error -> EmptyView()
-        is Success -> NoteView(uiState.note, viewModel)
+        is Success -> NoteView(uiState, viewModel)
     }
 }
 
@@ -54,12 +53,12 @@ internal fun NoteDetailsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NoteView(
-    note: Note,
+    state: Success,
     events: NoteDetailsUiEvents,
 ) {
     Scaffold(
         floatingActionButton = {
-            if (note.isEditable) {
+            if (state.isEditable) {
                 FloatingActionButton(
                     onClick = events::onDeleteNoteClicked,
                     containerColor = MaterialTheme.colorScheme.primary
@@ -78,19 +77,19 @@ private fun NoteView(
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp)
             ) {
-                var title by remember { mutableStateOf(note.title) }
-                var body by remember { mutableStateOf(note.body) }
+                var title by remember { mutableStateOf(state.note.title) }
+                var body by remember { mutableStateOf(state.note.body) }
                 OutlinedTextField(
                     value = title,
                     onValueChange = { newTitle ->
                         title = newTitle
-                        events.onNoteEdited(newTitle, note.body)
+                        events.onNoteEdited(newTitle, state.note.body)
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = note.isEditable,
+                    enabled = state.isEditable,
                     textStyle = MaterialTheme.typography.headlineMedium,
                     label = {
-                        if (note.isEditable) {
+                        if (state.isEditable) {
                             Text(
                                 text = stringResource(R.string.label_note_title),
                                 style = MaterialTheme.typography.labelMedium
@@ -102,7 +101,7 @@ private fun NoteView(
                         imeAction = ImeAction.Next
                     ),
                 )
-                note.cryptoAsset?.let { cryptoAsset ->
+                state.note.cryptoAsset?.let { cryptoAsset ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -123,9 +122,9 @@ private fun NoteView(
                         )
                     }
                 }
-                if (note.isEditable) {
+                if (state.isEditable) {
                     Text(
-                        text = note.createdAt.toLocalDateTime()
+                        text = state.note.createdAt.toLocalDateTime()
                             .format(LocalContext.current, DateTimeAttribute.DATE_TIME_SHORT),
                         modifier = Modifier.padding(top = 8.dp),
                         style = MaterialTheme.typography.labelSmall,
@@ -136,15 +135,15 @@ private fun NoteView(
                     value = body,
                     onValueChange = { newBody ->
                         body = newBody
-                        events.onNoteEdited(note.title, newBody)
+                        events.onNoteEdited(state.note.title, newBody)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp),
-                    enabled = note.isEditable,
+                    enabled = state.isEditable,
                     textStyle = MaterialTheme.typography.bodyLarge,
                     label = {
-                        if (note.isEditable) {
+                        if (state.isEditable) {
                             Text(
                                 text = stringResource(R.string.label_note_text),
                                 style = MaterialTheme.typography.labelMedium
@@ -165,7 +164,7 @@ private fun NoteView(
 @Preview
 private fun NoteDetailsPreview() {
     MaterialTheme {
-        NoteView(composeNotePreview, object : NoteDetailsUiEvents {
+        NoteView(Success(composeNotePreview, true), object : NoteDetailsUiEvents {
             override fun onDeleteNoteClicked() {}
             override fun onNoteEdited(title: String, body: String) {}
         })

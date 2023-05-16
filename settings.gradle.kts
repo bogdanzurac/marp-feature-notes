@@ -1,3 +1,4 @@
+include(":app-notes")
 include(":feature-notes-data")
 include(":feature-notes-domain")
 include(":feature-notes-ui")

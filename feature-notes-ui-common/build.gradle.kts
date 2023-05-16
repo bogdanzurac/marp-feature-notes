@@ -1,3 +1,6 @@
+import dev.bogdanzurac.marp.feature.notes.projects
+import dev.bogdanzurac.marp.feature.notes.useArtifacts
+
 plugins {
     alias(libs.plugins.marp.feature.ui)
     alias(libs.plugins.marp.publishing)
@@ -13,5 +16,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.marp.feature.notes.domain)
+    implementation(
+        if (useArtifacts) libs.marp.feature.notes.domain
+        else project(projects.featureNotesDomain)
+    )
 }

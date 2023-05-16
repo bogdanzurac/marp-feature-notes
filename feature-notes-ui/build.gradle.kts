@@ -1,3 +1,6 @@
+import dev.bogdanzurac.marp.feature.notes.projects
+import dev.bogdanzurac.marp.feature.notes.useArtifacts
+
 plugins {
     alias(libs.plugins.marp.feature.ui)
     alias(libs.plugins.marp.publishing)
@@ -15,6 +18,12 @@ android {
 dependencies {
     implementation(libs.marp.core.auth)
     implementation(libs.marp.feature.crypto.ui.common)
-    implementation(libs.marp.feature.notes.domain)
-    implementation(libs.marp.feature.notes.ui.common)
+    implementation(
+        if (useArtifacts) libs.marp.feature.notes.domain
+        else project(projects.featureNotesDomain)
+    )
+    implementation(
+        if (useArtifacts) libs.marp.feature.notes.ui.common
+        else project(projects.featureNotesUiCommon)
+    )
 }

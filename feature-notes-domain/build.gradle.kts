@@ -5,7 +5,7 @@ plugins {
 
 project.ext {
     group = "dev.bogdanzurac.marp"
-    version = "0.0.1"
+    version = "0.0.2"
 }
 
 android {

@@ -29,7 +29,9 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         create("libs") {
-            from("dev.bogdanzurac.marp.build:libs:0.0.11")
+            from("dev.bogdanzurac.marp.build:libs:0.0.12")
+            version("marpFeatureNotesDomain", "0.0.2")
+            version("marpFeatureNotesUiCommon", "0.0.2")
         }
     }
 
